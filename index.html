@@ -18,7 +18,7 @@
   <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@700&family=BIZ+UDPMincho:wght@700&display=swap" rel="stylesheet">
 
   <!-- Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
@@ -122,9 +122,9 @@
       
       <!-- Quiz Progress -->
       <div class="quiz-header">
-        <div class="progress-info">
-          <span>熟語モード</span>
-          <span id="quiz-progress-text">1 / 10問</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <button id="btn-quiz-exit" class="btn-secondary" style="margin: 0; padding: 6px 12px; font-size: 0.8rem; width: auto;">⚙️ 設定に戻る</button>
+          <span id="quiz-progress-text" style="font-weight: 700; font-size: 0.9rem; color: var(--text-muted);">1 / 10問</span>
         </div>
         <div class="progress-bar-container">
           <div id="quiz-progress-fill" class="progress-bar-fill"></div>
@@ -157,7 +157,6 @@
           <div class="answer-label">正解の熟語（用例）</div>
           <div class="answer-word">
             <span id="answer-word-text" style="font-family: 'UD デジタル 教科書体 N-B', 'UD デジタル 教科書体 N-R', 'UD Digital Kyokasho N-B', 'UD Digital Kyokasho N-R', 'UD デジタル 教科書体 NK-B', 'UD デジタル 教科書体 NP-B', 'BIZ UDPGothic', 'Kyokasho', '教科書体', sans-serif; font-size: 3.4rem; font-weight: 700;">--</span>
-            <button id="btn-speak" class="tts-btn" title="音声読み上げ">🔊</button>
           </div>
         </div>
 
@@ -182,10 +181,15 @@
         </div>
       </div>
 
-      <!-- Next Question Button -->
-      <button id="btn-next-question" class="btn-primary btn-next">
-        <span>次の問題へ ➡️</span>
-      </button>
+      <!-- Next Question & Changed-Mind Action Buttons -->
+      <div id="next-action-group" style="display: none; flex-direction: column; gap: 8px; margin-top: 16px;">
+        <button id="btn-next-question" class="btn-primary" style="margin-top: 0;">
+          <span>次の問題へ ➡️</span>
+        </button>
+        <button id="btn-override-incorrect" class="btn-secondary btn-danger" style="margin-top: 0;">
+          <span>❌ やっぱり不正解にする（不正解+1）</span>
+        </button>
+      </div>
 
     </section>
 
@@ -225,11 +229,14 @@
 
       <!-- Result Action Buttons -->
       <div style="display: flex; flex-direction: column; gap: 10px; margin-top: auto;">
+        <button id="btn-retry-exact-same" class="btn-primary" style="background: linear-gradient(135deg, #0EA5E9, #2563EB);">
+          🔁 同じ問題で挑戦
+        </button>
         <button id="btn-retry-failed" class="btn-primary" style="background: linear-gradient(135deg, #F59E0B, #D97706); display: none;">
           🔄 間違えた問題だけ再挑戦
         </button>
-        <button id="btn-retry-same" class="btn-primary">
-          🔁 もう一度同じ設定で挑戦
+        <button id="btn-retry-same" class="btn-secondary">
+          🎲 新しい問題（同じ設定）で挑戦
         </button>
         <button id="btn-go-settings" class="btn-secondary">
           ⚙️ 設定画面に戻る
@@ -265,6 +272,6 @@
   </div>
 
   <!-- JavaScript Core App -->
-  <script src="app.js"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>

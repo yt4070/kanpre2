@@ -360,10 +360,12 @@
   };
 
   const btnStartQuiz = document.getElementById('btn-start-quiz');
+  const btnQuizExit = document.getElementById('btn-quiz-exit');
   const btnKnow = document.getElementById('btn-know');
   const btnDontKnow = document.getElementById('btn-dontknow');
   const btnNextQuestion = document.getElementById('btn-next-question');
-  const btnSpeak = document.getElementById('btn-speak');
+  const btnOverrideIncorrect = document.getElementById('btn-override-incorrect');
+  const nextActionGroup = document.getElementById('next-action-group');
   
   const quizProgressText = document.getElementById('quiz-progress-text');
   const quizProgressFill = document.getElementById('quiz-progress-fill');
@@ -383,6 +385,7 @@
   const resultKnowCount = document.getElementById('result-know-count');
   const resultDontknowCount = document.getElementById('result-dontknow-count');
   const reviewItemsList = document.getElementById('review-items-list');
+  const btnRetryExactSame = document.getElementById('btn-retry-exact-same');
   const btnRetryFailed = document.getElementById('btn-retry-failed');
   const btnRetrySame = document.getElementById('btn-retry-same');
   const btnGoSettings = document.getElementById('btn-go-settings');
@@ -581,13 +584,20 @@
   }
 
   // --- Quiz Session Flow ---
-  function startQuiz(customItems = null) {
-    const selectedCount = parseInt(document.querySelector('input[name="quiz-count"]:checked')?.value || '10', 10);
-    const selectedMode = document.querySelector('input[name="quiz-mode"]:checked')?.value || 'random';
+  function startQuiz(customItems = null, isExactRepeat = false) {
+    if (!isExactRepeat) {
+      const selectedCount = parseInt(document.querySelector('input[name="quiz-count"]:checked')?.value || '10', 10);
+      const selectedMode = document.querySelector('input[name="quiz-mode"]:checked')?.value || 'random';
 
-    currentSession.configCount = selectedCount;
-    currentSession.configMode = selectedMode;
-    currentSession.questions = generateQuestionSet(selectedCount, selectedMode, customItems);
+      currentSession.configCount = selectedCount;
+      currentSession.configMode = selectedMode;
+      if (customItems && customItems.length > 0) {
+        currentSession.questions = [...customItems];
+      } else {
+        currentSession.questions = generateQuestionSet(selectedCount, selectedMode);
+      }
+    }
+    
     currentSession.currentIndex = 0;
     currentSession.results = [];
 
@@ -616,7 +626,7 @@
     // Reset Answer & Button states
     quizActions.style.display = 'grid';
     answerReveal.classList.remove('visible');
-    btnNextQuestion.classList.remove('visible');
+    if (nextActionGroup) nextActionGroup.style.display = 'none';
 
     // Populate hidden answer card details
     answerWordText.textContent = item.yourei || item.kanji;
@@ -642,10 +652,36 @@
       navigator.vibrate(isKnow ? 30 : [40, 40, 40]);
     }
 
-    // Hide choice buttons, reveal detailed answer card & Next button
+    // Hide choice buttons, reveal detailed answer card & Next button group
     quizActions.style.display = 'none';
     answerReveal.classList.add('visible');
-    btnNextQuestion.classList.add('visible');
+    if (nextActionGroup) nextActionGroup.style.display = 'flex';
+  }
+
+  function handleOverrideIncorrect() {
+    const item = currentSession.questions[currentSession.currentIndex];
+    if (!item) return;
+
+    // Update current session result if exists
+    const currIndex = currentSession.results.length - 1;
+    if (currIndex >= 0 && currentSession.results[currIndex]) {
+      currentSession.results[currIndex].answer = 'dontknow';
+    } else {
+      currentSession.results.push({ item: item, answer: 'dontknow' });
+    }
+
+    // Add +1 to incorrect count in database
+    if (!userStats[item.id]) {
+      userStats[item.id] = { attempts: 1, incorrects: 1, lastAnswered: Date.now() };
+    } else {
+      userStats[item.id].incorrects = (userStats[item.id].incorrects || 0) + 1;
+      userStats[item.id].lastAnswered = Date.now();
+    }
+    saveUserStats();
+    updateDashboardStats();
+
+    // Proceed to next question
+    handleNextQuestion();
   }
 
   function handleNextQuestion() {
@@ -654,23 +690,6 @@
       displayCurrentQuestion();
     } else {
       showResultsScreen();
-    }
-  }
-
-  // --- Speech Synthesis (TTS) ---
-  function speakWord() {
-    const item = currentSession.questions[currentSession.currentIndex];
-    if (!item) return;
-
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const textToSay = `${item.yourei}。${item.reibun}`;
-      const utterance = new SpeechSynthesisUtterance(textToSay);
-      utterance.lang = 'ja-JP';
-      utterance.rate = 0.9;
-      window.speechSynthesis.speak(utterance);
-    } else {
-      alert('お使いのブラウザは音声読み上げに対応していません。');
     }
   }
 
@@ -800,12 +819,14 @@
     btnStartQuiz.addEventListener('click', () => startQuiz());
 
     // Quiz Buttons
+    if (btnQuizExit) btnQuizExit.addEventListener('click', () => switchScreen('settings'));
     btnKnow.addEventListener('click', () => handleAnswer(true));
     btnDontKnow.addEventListener('click', () => handleAnswer(false));
     btnNextQuestion.addEventListener('click', handleNextQuestion);
-    btnSpeak.addEventListener('click', speakWord);
+    if (btnOverrideIncorrect) btnOverrideIncorrect.addEventListener('click', handleOverrideIncorrect);
 
     // Result Screen Buttons
+    if (btnRetryExactSame) btnRetryExactSame.addEventListener('click', () => startQuiz(null, true));
     btnRetrySame.addEventListener('click', () => startQuiz());
     btnRetryFailed.addEventListener('click', () => {
       const failedItems = currentSession.results.filter(r => r.answer === 'dontknow').map(r => r.item);

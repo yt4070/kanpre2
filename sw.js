@@ -1,9 +1,9 @@
-const CACHE_NAME = 'kanpre2-v4';
+const CACHE_NAME = 'kanpre2-v5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './style.css?v=4',
-  './app.js',
+  './style.css?v=5',
+  './app.js?v=5',
   './manifest.json',
   './kanken_pre2.csv'
 ];
