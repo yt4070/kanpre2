@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>漢検準2級 熟語単語帳</title>
+  
+  <!-- PWA Metadata & Icons -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4F46E5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <!-- Google Fonts for Educational Japanese Fonts (BIZ UDPGothic / Mincho) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@700&family=BIZ+UDPMincho:wght@700&display=swap" rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css?v=4">
+</head>
+<body>
+
+  <div class="app-viewport">
+    
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="app-brand">
+        <div class="app-brand-icon">準2</div>
+        <span>漢検単語帳</span>
+      </div>
+      <div class="header-actions">
+        <button id="btn-toggle-stats" class="icon-btn" title="学習データ" aria-label="学習データ">📊</button>
+        <button id="btn-toggle-theme" class="icon-btn" title="ダークモード切り替え" aria-label="ダークモード">🌙</button>
+      </div>
+    </header>
+
+    <!-- MAIN SCREEN 1: SETTINGS / HOME -->
+    <section id="screen-settings" class="screen active">
+      
+      <!-- General Stats Card -->
+      <div class="card">
+        <div class="card-title">📈 学習ステータス</div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center;">
+          <div>
+            <div id="stat-total-items" style="font-weight: 800; font-size: 1.2rem; color: var(--primary);">329</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">総収録語数</div>
+          </div>
+          <div>
+            <div id="stat-total-attempts" style="font-weight: 800; font-size: 1.2rem; color: var(--secondary);">0</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">累計解答数</div>
+          </div>
+          <div>
+            <div id="stat-mastery-rate" style="font-weight: 800; font-size: 1.2rem; color: var(--success);">0%</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">平均正答率</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quiz Config Card -->
+      <div class="card">
+        <div class="card-title">⚙️ 出題設定</div>
+
+        <!-- Question Count -->
+        <div class="setting-group">
+          <label class="setting-label">問題数の選択</label>
+          <div class="option-grid">
+            <div class="radio-pill">
+              <input type="radio" id="count-10" name="quiz-count" value="10" checked>
+              <label for="count-10">10問</label>
+            </div>
+            <div class="radio-pill">
+              <input type="radio" id="count-20" name="quiz-count" value="20">
+              <label for="count-20">20問</label>
+            </div>
+            <div class="radio-pill">
+              <input type="radio" id="count-50" name="quiz-count" value="50">
+              <label for="count-50">50問</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Question Selection Logic -->
+        <div class="setting-group">
+          <label class="setting-label">出題アルゴリズム</label>
+          <div class="mode-list">
+            <div class="mode-pill">
+              <input type="radio" id="mode-random" name="quiz-mode" value="random" checked>
+              <label for="mode-random">
+                <div class="mode-name">🎲 全数からランダム</div>
+                <div class="mode-desc">収録単語すべてからランダムに出題します</div>
+              </label>
+            </div>
+            <div class="mode-pill">
+              <input type="radio" id="mode-incorrect" name="quiz-mode" value="incorrect">
+              <label for="mode-incorrect">
+                <div class="mode-name">❌ 不正解からランダム</div>
+                <div class="mode-desc">過去に「分からない」と答えた語を優先出題</div>
+              </label>
+            </div>
+            <div class="mode-pill">
+              <input type="radio" id="mode-least" name="quiz-mode" value="least">
+              <label for="mode-least">
+                <div class="mode-name">📈 出題数が少ないものからランダム</div>
+                <div class="mode-desc">まだ解答回数が少ない語を優先して出題</div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Start Button -->
+      <button id="btn-start-quiz" class="btn-primary">
+        <span>📖 熟語モードで学習開始</span>
+      </button>
+    </section>
+
+    <!-- MAIN SCREEN 2: QUIZ / FLASHCARD SCREEN -->
+    <section id="screen-quiz" class="screen">
+      
+      <!-- Quiz Progress -->
+      <div class="quiz-header">
+        <div class="progress-info">
+          <span>熟語モード</span>
+          <span id="quiz-progress-text">1 / 10問</span>
+        </div>
+        <div class="progress-bar-container">
+          <div id="quiz-progress-fill" class="progress-bar-fill"></div>
+        </div>
+      </div>
+
+      <!-- Flashcard Display -->
+      <div class="flashcard">
+        <span class="sentence-tag">出題（例文）</span>
+        <div id="quiz-sentence" class="sentence-display">
+          例文を読み込み中...
+        </div>
+      </div>
+
+      <!-- Answer Response Buttons -->
+      <div id="quiz-actions" class="quiz-actions">
+        <button id="btn-know" class="btn-answer btn-know">
+          <span class="btn-icon">⭕</span>
+          <span>分かった</span>
+        </button>
+        <button id="btn-dontknow" class="btn-answer btn-dontknow">
+          <span class="btn-icon">❌</span>
+          <span>分からない</span>
+        </button>
+      </div>
+
+      <!-- Answer Reveal Box (Hidden by default) -->
+      <div id="answer-reveal" class="answer-reveal">
+        <div class="answer-word-box">
+          <div class="answer-label">正解の熟語（用例）</div>
+          <div class="answer-word">
+            <span id="answer-word-text" style="font-family: 'UD デジタル 教科書体 N-B', 'UD デジタル 教科書体 N-R', 'UD Digital Kyokasho N-B', 'UD Digital Kyokasho N-R', 'UD デジタル 教科書体 NK-B', 'UD デジタル 教科書体 NP-B', 'BIZ UDPGothic', 'Kyokasho', '教科書体', sans-serif; font-size: 3.4rem; font-weight: 700;">--</span>
+            <button id="btn-speak" class="tts-btn" title="音声読み上げ">🔊</button>
+          </div>
+        </div>
+
+        <!-- Kanji Details Meta Grid -->
+        <div class="kanji-meta-grid">
+          <div class="meta-item">
+            <span class="meta-item-key">対象漢字</span>
+            <span id="meta-kanji" class="meta-item-val">-</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-item-key">音読み</span>
+            <span id="meta-onyomi" class="meta-item-val">-</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-item-key">訓読み</span>
+            <span id="meta-kunyomi" class="meta-item-val">-</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-item-key">部首 / 画数</span>
+            <span id="meta-bushu-kakusu" class="meta-item-val">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next Question Button -->
+      <button id="btn-next-question" class="btn-primary btn-next">
+        <span>次の問題へ ➡️</span>
+      </button>
+
+    </section>
+
+    <!-- MAIN SCREEN 3: RESULT SUMMARY SCREEN -->
+    <section id="screen-result" class="screen">
+      
+      <div class="result-header">
+        <h2 style="font-size: 1.4rem; font-weight: 900; margin-bottom: 12px;">学習セッション完了！</h2>
+        
+        <div id="result-ring" class="result-ring" style="--score-pct: 80;">
+          <div class="result-ring-inner">
+            <div id="result-score-val" class="result-score-val">80%</div>
+            <div class="result-score-unit">正解率</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Counts -->
+      <div class="result-stats-row">
+        <div class="result-stat-card know">
+          <div style="font-size: 0.8rem; color: var(--text-muted);">分かった</div>
+          <div id="result-know-count" class="result-stat-num">8</div>
+        </div>
+        <div class="result-stat-card dontknow">
+          <div style="font-size: 0.8rem; color: var(--text-muted);">分からない</div>
+          <div id="result-dontknow-count" class="result-stat-num">2</div>
+        </div>
+      </div>
+
+      <!-- Review List Card -->
+      <div class="card" style="flex: 1; display: flex; flex-direction: column;">
+        <div class="card-title">📝 要復習単語（分からないと答えた単語）</div>
+        <div id="review-items-list" class="review-list">
+          <!-- Dynamic item insertion -->
+        </div>
+      </div>
+
+      <!-- Result Action Buttons -->
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: auto;">
+        <button id="btn-retry-failed" class="btn-primary" style="background: linear-gradient(135deg, #F59E0B, #D97706); display: none;">
+          🔄 間違えた問題だけ再挑戦
+        </button>
+        <button id="btn-retry-same" class="btn-primary">
+          🔁 もう一度同じ設定で挑戦
+        </button>
+        <button id="btn-go-settings" class="btn-secondary">
+          ⚙️ 設定画面に戻る
+        </button>
+      </div>
+
+    </section>
+
+    <!-- MODAL: STATS & DATABASE MANAGEMENT -->
+    <div id="modal-stats" class="modal-overlay">
+      <div class="modal-box">
+        <div class="modal-header">
+          <div class="modal-title">📊 収録単語データベース情報</div>
+          <button id="btn-close-modal" class="icon-btn">✕</button>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="stats-search" placeholder="漢字・用例で検索..." style="width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--surface-border); margin-bottom: 12px; font-size: 0.9rem;">
+          <div id="stats-table-container" style="font-size: 0.85rem;">
+            <!-- Dynamic table inserted via app.js -->
+          </div>
+        </div>
+        <div style="margin-top: 12px; border-top: 1px solid var(--surface-border); padding-top: 12px;">
+          <button id="btn-reset-db" class="btn-secondary btn-danger">🗑️ 解答履歴データをすべてリセット</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- App Footer -->
+    <footer class="app-footer">
+      漢検準2級 熟語単語帳 PWA v1.0
+    </footer>
+
+  </div>
+
+  <!-- JavaScript Core App -->
+  <script src="app.js"></script>
+</body>
+</html>
