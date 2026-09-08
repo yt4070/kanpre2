@@ -341,13 +341,13 @@ body {
   background: var(--surface);
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-lg);
-  padding: 24px 20px;
+  padding: 12px 10px;
   box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
   position: relative;
-  min-height: 220px;
+  min-height: 200px;
   justify-content: center;
   text-align: center;
 }
