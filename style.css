@@ -450,7 +450,8 @@ body {
 
 .answer-word,
 #answer-word-text {
-  font-family: 'UD デジタル 教科書体 N-B', 'UD デジタル 教科書体 N-R', 'UD Digital Kyokasho N-B', 'UD Digital Kyokasho N-R', 'UD デジタル 教科書体 NK-B', 'UD デジタル 教科書体 NP-B', 'BIZ UDPGothic', 'Kyokasho', '教科書体', sans-serif !important;
+  /* font-family: 'UD デジタル 教科書体 N-B', 'UD デジタル 教科書体 N-R', 'UD Digital Kyokasho N-B', 'UD Digital Kyokasho N-R', 'UD デジタル 教科書体 NK-B', 'UD デジタル 教科書体 NP-B', 'BIZ UDPGothic', 'Kyokasho', '教科書体', sans-serif !important; */
+  font-family: 'BIZ UDPMincho', serif !important;
   font-size: 3.4rem !important; /* 書き取りに最適化された教科書体表示 */
   font-weight: 700 !important;
   color: var(--primary);
